@@ -184,6 +184,7 @@ struct zynq_gem_priv {
 	struct clk clk;
 	u32 max_speed;
 	bool int_pcs;
+	bool fixed_link;
 };
 
 static u32 phy_setup_op(struct zynq_gem_priv *priv, u32 phy_addr, u32 regnum,
@@ -247,6 +248,9 @@ static int phy_detection(struct udevice *dev)
 	int i;
 	u16 phyreg;
 	struct zynq_gem_priv *priv = dev->priv;
+
+	if(priv->fixed_link)
+		return 0;
 
 	if (priv->phyaddr != -1) {
 		phyread(priv, priv->phyaddr, PHY_DETECT_REG, &phyreg);
@@ -690,6 +694,8 @@ static int zynq_gem_ofdata_to_platdata(struct udevice *dev)
 	struct zynq_gem_priv *priv = dev_get_priv(dev);
 	int node = dev_of_offset(dev);
 	const char *phy_mode;
+	int sn;
+	const char *name;
 
 	pdata->iobase = (phys_addr_t)devfdt_get_addr(dev);
 	priv->iobase = (struct zynq_gem_regs *)pdata->iobase;
@@ -715,9 +721,20 @@ static int zynq_gem_ofdata_to_platdata(struct udevice *dev)
 					  "max-speed", SPEED_1000);
 	priv->int_pcs = fdtdec_get_bool(gd->fdt_blob, node,
 					"is-internal-pcspma");
+	
+	priv->fixed_link = 0;
+	sn = fdt_first_subnode(gd->fdt_blob, dev_of_offset(dev));
+	while (sn > 0) {
+		name = fdt_get_name(gd->fdt_blob, sn, NULL);
+		if (name != NULL && strcmp(name, "fixed-link") == 0) {
+				priv->fixed_link = 1;
+			break;
+		}
+		sn = fdt_next_subnode(gd->fdt_blob, sn);
+	}
 
-	printf("ZYNQ GEM: %lx, phyaddr %x, interface %s\n", (ulong)priv->iobase,
-	       priv->phyaddr, phy_string_for_interface(priv->interface));
+	printf("ZYNQ GEM: %lx, phyaddr %x, fixed-link %d, interface %s\n", (ulong)priv->iobase,
+	       priv->phyaddr, priv->fixed_link, phy_string_for_interface(priv->interface));
 
 	return 0;
 }
