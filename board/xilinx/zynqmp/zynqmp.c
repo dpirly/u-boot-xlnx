@@ -23,6 +23,7 @@
 #include <zynqmppl.h>
 #include <i2c.h>
 #include <g_dnl.h>
+#include <t6290_edpu.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 
@@ -450,6 +451,18 @@ void reset_cpu(ulong addr)
 {
 }
 
+void add_edpu_env(void)
+{
+  puts("add_edpu_env called\n");
+
+  env_set("scsi_init", "scsi scan");
+  
+  env_set("scsi_cp_fpga", "load scsi 0 ${netstart} top.bit && fpga loadb 0 ${netstart} 26510888");
+  env_set("scsi_cp_kernel", "load scsi 0 ${netstart} ${kernel_img}");
+  
+  env_set("scsi_boot", "run scsi_init && run scsi_cp_fpga && run scsi_cp_kernel && bootm ${netstart}");
+}
+
 int board_late_init(void)
 {
 	u32 ver, reg = 0;
@@ -458,6 +471,10 @@ int board_late_init(void)
 	char *new_targets;
 	char *env_targets;
 	int ret;
+
+	edpu_cpld_init();
+
+	add_edpu_env();
 
 	if (!(gd->flags & GD_FLG_ENV_DEFAULT)) {
 		debug("Saved variables - Skipping\n");

@@ -197,3 +197,6 @@ $(obj)/license_data_size.h: $(srctree)/Licenses/gpl-2.0.txt FORCE
 	$(call filechk,data_size)
 
 CFLAGS_ethsw.o := -Wno-enum-conversion
+
+# for T6290E eDPU CPLD
+obj-y += edpu_cpld.o
