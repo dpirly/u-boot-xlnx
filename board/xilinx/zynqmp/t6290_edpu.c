@@ -64,7 +64,7 @@ int edpu_cpld_write(uint32_t addr, uint32_t data)
 	uint32_t data_in;
 	uint32_t data_out;
 	
-	printf("edpu_cpld_write(0x%04x, 0x%06x)\n", addr, data);
+	//printf("edpu_cpld_write(0x%04x, 0x%06x)\n", addr, data);
 	
 	data_out = (addr << 24) | data;
 	data_out = htonl(data_out);
@@ -89,7 +89,7 @@ uint32_t edpu_cpld_read(uint32_t addr)
 	}
 
 	r = ntohl(data_in) & 0xffffff;
-	printf("edpu_cpld_read(0x%06x) = 0x%04x)\n", addr, r);
+	//printf("edpu_cpld_read(0x%06x) = 0x%04x)\n", addr, r);
 	
 	return r;
 }
@@ -104,12 +104,10 @@ char* edpu_cpld_version(void){
 }
 
 void board_poweroff(void){
-	puts("write eDPU cpld to poweroff\n");
 	edpu_cpld_write(T6290_EDPU_REG_POWER_OFF_c, 0xffff);
 }
 
 void board_reset(void){
-	puts("write eDPU cpld to reset\n");
 	edpu_cpld_write(T6290_EDPU_REG_SYS_RESTART_c, 0xffff);
 }
 
