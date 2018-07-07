@@ -27,9 +27,15 @@ __weak void reset_misc(void)
 {
 }
 
+void __weak board_reset(void)
+{
+}
+
 int do_reset(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 {
 	puts ("resetting ...\n");
+
+	board_reset();
 
 	udelay (50000);				/* wait 50 ms */
 
