@@ -115,10 +115,16 @@ void __noreturn __efi_runtime psci_system_off(void)
 		;
 }
 
+void __weak board_poweroff(void)
+{
+}
+
 #ifdef CONFIG_CMD_POWEROFF
 int do_poweroff(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 {
 	puts("poweroff ...\n");
+
+	board_poweroff();
 
 	udelay(50000); /* wait 50 ms */
 
