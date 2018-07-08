@@ -3,7 +3,7 @@
 
 #include <t6290_edpu.h>
 
-int do_edpu_spi (cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
+int do_edpu_pld (cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 {
 	unsigned long addr;
 	unsigned long data;
@@ -39,7 +39,7 @@ int do_edpu_spi (cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 /***************************************************/
 
 U_BOOT_CMD(
-	edpu_cpld,	5,	1,	do_edpu_spi,
+	edpu_pld,	5,	1,	do_edpu_pld,
 	"T6290 eDPU cpld utility command",
 	"<operation> <addr> [data]\n"
 	"<operation> - r: read, w: write\n"
