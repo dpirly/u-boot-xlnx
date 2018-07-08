@@ -104,11 +104,11 @@ char* edpu_cpld_version(void){
 }
 
 void board_poweroff(void){
-	edpu_cpld_write(T6290_EDPU_REG_POWER_OFF_c, 0xffff);
+	edpu_cpld_write(T6290_EDPU_REG_POWER_OFF_c, 0x7ff);
 }
 
 void board_reset(void){
-	edpu_cpld_write(T6290_EDPU_REG_SYS_RESTART_c, 0xffff);
+	edpu_cpld_write(T6290_EDPU_REG_SYS_RESTART_c, 0x7ff);
 }
 
 #define EDPU_CPLD_FLASH_READ     (0b000)
