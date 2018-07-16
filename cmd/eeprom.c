@@ -147,8 +147,10 @@ static int eeprom_rw_block(unsigned offset, uchar *addr, unsigned alen,
 	else
 		ret = i2c_write(addr[0], offset, alen - 1, buffer, len);
 
-	if (ret)
+	if (ret){
+		printf("eeprom_rw_block(), ret=%d, read flag =%d\n", ret, read);
 		ret = 1;
+	}
 #endif
 	return ret;
 }

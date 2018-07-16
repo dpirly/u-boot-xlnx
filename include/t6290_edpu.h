@@ -41,9 +41,29 @@
 #define T6290_EDPU_REG_UFM_RD_DATA6_c      (0x23)
 #define T6290_EDPU_REG_UFM_RD_DATA7_c      (0x24)
 #define T6290_EDPU_REG_UFM_RD_STATUS_c     (0x25)
+
+
+#define MODULE_RESET_DSP_0				(1<<0)
+#define MODULE_RESET_DSP_1				(1<<1)
+#define MODULE_RESET_AD9542_0			(1<<4)
+#define MODULE_RESET_AD9542_1			(1<<5)
+#define MODULE_RESET_DSP_0_PHY		(1<<6)
+#define MODULE_RESET_DSP_1_PHY		(1<<7)
+#define MODULE_RESET_ETH_SW_0			(1<<8)
+#define MODULE_RESET_ETH_SW_1			(1<<9)
+#define MODULE_RESET_USB_0				(1<<10)
+#define MODULE_RESET_USB_1				(1<<11)
+#define MODULE_RESET_SYS_I2C			(1<<12)
+
   
 int edpu_cpld_write(uint32_t addr, uint32_t data);
 uint32_t edpu_cpld_read(uint32_t addr);
+
+
+int edpu_cpld_flash_erase(void);
+int edpu_cpld_flash_write(uint16_t page_addr, uint16_t* p);
+int edpu_cpld_flash_read(uint32_t page_addr, uint32_t traceid, uint16_t* p);
+
 
 char* edpu_cpld_version(void);
 void edpu_cpld_init(void);

@@ -182,111 +182,58 @@
 	scl-gpios = <&gpio 16 GPIO_ACTIVE_HIGH>;
 	sda-gpios = <&gpio 17 GPIO_ACTIVE_HIGH>;
 
-	/* PL i2c via PCA9306 - u45 */
-	i2c-mux@74 { /* u34 */
+	i2c-mux@70 { /* A2A1A0=000 */
 		compatible = "nxp,pca9548";
 		#address-cells = <1>;
 		#size-cells = <0>;
-		reg = <0x74>;
+		reg = <0x70>;
 		i2c@0 {
 			#address-cells = <1>;
 			#size-cells = <0>;
 			reg = <0>;
-			/*
-			 * IIC_EEPROM 1kB memory which uses 256B blocks
-			 * where every block has different address.
-			 *    0 - 256B address 0x54
-			 * 256B - 512B address 0x55
-			 * 512B - 768B address 0x56
-			 * 768B - 1024B address 0x57
-			 */
-			eeprom: eeprom@54 { /* u23 */
-				compatible = "atmel,24c08";
-				reg = <0x54>;
+			ina226@40 { /* D36, +12V FMC */
+				compatible = "ti,ina226";
+				reg = <0x40>;
+				shunt-resistor = <5000>;
+			};
+			ina226@41 {  /* D31, +12V EPSU */
+				compatible = "ti,ina226";
+				reg = <0x41>;
+				shunt-resistor = <5000>;
 			};
 		};
 		i2c@1 {
 			#address-cells = <1>;
 			#size-cells = <0>;
 			reg = <1>;
-			si5341: clock-generator@36 { /* SI5341 - u69 */
-				compatible = "silabs,si5341";
-				reg = <0x36>;
+			eeprom0: eeprom@50 { /* D7, DSP1-EEPROM */
+				compatible = "atmel,24c512";
+				reg = <0x50>;
 			};
-
 		};
 		i2c@2 {
 			#address-cells = <1>;
 			#size-cells = <0>;
 			reg = <2>;
-			si570_1: clock-generator@5d { /* USER SI570 - u42 */
-				#clock-cells = <0>;
-				compatible = "silabs,si570";
-				reg = <0x5d>;
-				temperature-stability = <50>;
-				factory-fout = <300000000>;
-				clock-frequency = <300000000>;
+			eeprom1: eeprom@51 { /* D6, DSP2-EEPROM */
+				compatible = "atmel,24c512";
+				reg = <0x51>;
 			};
 		};
 		i2c@3 {
 			#address-cells = <1>;
 			#size-cells = <0>;
 			reg = <3>;
-			si570_2: clock-generator@5d { /* USER MGT SI570 - u56 */
-				#clock-cells = <0>;
-				compatible = "silabs,si570";
-				reg = <0x5d>;
-				temperature-stability = <50>; /* copy from zc702 */
-				factory-fout = <156250000>;
-				clock-frequency = <148500000>;
+			adt75: adt75@47 { /* N1 */
+				compatible = "adt75";
+				reg = <0x47>;
 			};
 		};
 		i2c@4 {
 			#address-cells = <1>;
 			#size-cells = <0>;
 			reg = <4>;
-			si5328: clock-generator@69 {/* SI5328 - u20 */
-				compatible = "silabs,si5328";
-				reg = <0x69>;
-				/*
-				 * Chip has interrupt present connected to PL
-				 * interrupt-parent = <&>;
-				 * interrupts = <>;
-				 */
-			};
-		};
-		/* 5 - 7 unconnected */
-	};
-
-	i2c-mux@75 {
-		compatible = "nxp,pca9548"; /* u135 */
-		#address-cells = <1>;
-		#size-cells = <0>;
-		reg = <0x75>;
-
-		i2c@0 {
-			#address-cells = <1>;
-			#size-cells = <0>;
-			reg = <0>;
-			/* HPC0_IIC */
-		};
-		i2c@1 {
-			#address-cells = <1>;
-			#size-cells = <0>;
-			reg = <1>;
-			/* HPC1_IIC */
-		};
-		i2c@2 {
-			#address-cells = <1>;
-			#size-cells = <0>;
-			reg = <2>;
-			/* SYSMON */
-		};
-		i2c@3 {
-			#address-cells = <1>;
-			#size-cells = <0>;
-			reg = <3>;
-			/* DDR4 SODIMM */
+			/* PS DDR4 SODIMM */
 			dev@19 {
 				reg = <0x19>;
 			};
@@ -303,30 +250,43 @@
 				reg = <0x51>;
 			};
 		};
-		i2c@4 {
-			#address-cells = <1>;
-			#size-cells = <0>;
-			reg = <4>;
-			/* SEP 3 */
-		};
 		i2c@5 {
 			#address-cells = <1>;
 			#size-cells = <0>;
 			reg = <5>;
-			/* SEP 2 */
+			/* PL DDR4 SODIMM */
+			dev@19 {
+				reg = <0x19>;
+			};
+			dev@30 {
+				reg = <0x30>;
+			};
+			dev@35 {
+				reg = <0x35>;
+			};
+			dev@36 {
+				reg = <0x36>;
+			};
+			dev@51 {
+				reg = <0x51>;
+			};
 		};
 		i2c@6 {
 			#address-cells = <1>;
 			#size-cells = <0>;
 			reg = <6>;
-			/* SEP 1 */
+			hd3ss3220@67 {
+				compatible = "ti,hd3ss3220";
+				reg = <0x67>;
+			};
 		};
 		i2c@7 {
 			#address-cells = <1>;
 			#size-cells = <0>;
 			reg = <7>;
-			/* SEP 0 */
+			/* QSFP */
 		};
+
 	};
 };
 
