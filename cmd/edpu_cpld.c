@@ -13,8 +13,6 @@ int do_edpu_pld (cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 	unsigned int is_flash = 0;
 	unsigned int is_erase = 0;
 
-	printf("argc=%d\n", argc);
-	
 	if(argc >= 4){/*write, eg: edpu_pld w 0x12 0x34*/
 		if(argv[1][0] == 'w' || 
 			(argv[1][0] == 'f' && argv[1][1] == 'w')){
@@ -31,7 +29,7 @@ int do_edpu_pld (cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 			return CMD_RET_USAGE;
 	}else if(argc == 3){ /* read, eg: edpu_pld r 0x12 */
 	
-		if(argv[1][0] != 'r' || 
+		if(argv[1][0] == 'r' || 
 			(argv[1][0] == 'f' && argv[1][1] == 'r')){
 			is_read = 1;
 			addr = simple_strtoul(argv[2], NULL, 16); /* address */
