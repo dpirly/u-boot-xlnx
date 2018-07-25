@@ -621,8 +621,10 @@ void board_reset(void){
 #define EDPU_CPLD_FLASH_ERASE    (0b111)
 #define EDPU_CPLD_FLASH_TRACEID  (0b110)
 
-#define EDPU_CPLD_FLASH_PAGE_MAC_PS  (10)
-#define EDPU_CPLD_FLASH_PAGE_MAC_DSP (11)
+#define EDPU_CPLD_FLASH_PAGE_INSTRU_SN  (6)
+#define EDPU_CPLD_FLASH_PAGE_BOARD_SN   (7)
+#define EDPU_CPLD_FLASH_PAGE_MAC_PS     (10)
+#define EDPU_CPLD_FLASH_PAGE_MAC_DSP    (11)
 
 static int edpu_cpld_flash_ready(void){
 	uint32_t i,r;
@@ -661,6 +663,7 @@ static int edpu_cpld_flash_enable(uint32_t en){
 
 int edpu_cpld_flash_write(uint16_t page_addr, uint16_t* p){
 	uint32_t i;
+	uint32_t data; 
 
 	if(p == 0)
 		return -EINVAL;
@@ -671,7 +674,8 @@ int edpu_cpld_flash_write(uint16_t page_addr, uint16_t* p){
 
 	/* load data */
 	for (i=0; i<8; i++){
-		edpu_cpld_write(T6290_EDPU_REG_UFM_WR_DATA_c, *p + (i << 16));
+		data = htons(*p); /* to network-order(big-ending) */
+		edpu_cpld_write(T6290_EDPU_REG_UFM_WR_DATA_c, data | (i << 16));
 		p++;
 	}
 
@@ -736,6 +740,7 @@ int edpu_cpld_flash_read(uint32_t page_addr, uint32_t traceid, uint16_t* p){
 	/* read the result */
 	for(i=0; i<8; i++){
 		*p = (edpu_cpld_read(T6290_EDPU_REG_UFM_RD_DATA0_c + i) & 0xffff);
+		*p = ntohs(*p);  /* to host order */
 		p++;
 	}
 
@@ -785,30 +790,7 @@ void edpu_init_eth_mac(void){
 	}
 }
 
-void ufm_flash_test(void){
-	static uint8_t buf[16]={0};
-	int r;
-	
-	buf[0]=buf[1] =0x28;
 
-	buf[2] = 0x00;
-	buf[3] = 0x0a;
-	buf[4] = 0x35;
-	buf[5] = 0x00;
-	buf[6] = 0x00;
-	buf[7] = 0x01;
-
-	buf[8] = 0x00;
-	buf[9] = 0x0a;
-	buf[10] = 0x35;
-	buf[11] = 0x00;
-	buf[12] = 0x00;
-	buf[13] = 0x02;
-	r = edpu_cpld_flash_write(EDPU_CPLD_FLASH_PAGE_MAC_PS, (uint16_t*)buf);
-	if(r != 0)
-		printf("flash write faild\n");
-
-}
 void edpu_cpld_init(void)
 {
 	printf("\neDPU CPLD:%s\n", edpu_cpld_version());
