@@ -25,6 +25,7 @@
 
 #define CONFIG_SYS_I2C_EEPROM_ADDR        0x50    /* EEPROM at24c08        */
 #define CONFIG_SYS_I2C_EEPROM_ADDR_LEN     2      /* Bytes of address        */
+#define CONFIG_SYS_EEPROM_PAGE_WRITE_DELAY_MS    10  /* delay of each i2c eeprom write */
 
 
 #define CONFIG_EXTRA_ENV_SETTINGS \
@@ -34,7 +35,6 @@
 	"kernel_img=image.ub\0" \
 	"sataboot=scsi scan && " \
 		"load scsi $scsidev $image_addr $fpga_img && fpga loadb $scsidev $fileaddr $filesize && " \
-		"setenv bootargs earlycon clk_ignore_unused root=/dev/sda2 rw rootwait rootfstype=ext4 && "\
 		"load scsi $scsidev $image_addr $kernel_img && " \
 		"bootm $fileaddr\0"
 #include <configs/xilinx_zynqmp.h>
