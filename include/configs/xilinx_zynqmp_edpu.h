@@ -32,9 +32,12 @@
 	"image_addr=0x10000000\0" \
 	"scsidev=0\0" \
 	"fpga_img=fpga.bit\0" \
+	"fpga_idx=0\0" \
 	"kernel_img=image.ub\0" \
 	"sataboot=scsi scan && " \
-		"load scsi $scsidev $image_addr $fpga_img && fpga loadb $scsidev $fileaddr $filesize && " \
+		"if test -e scsi $scsidev $fpga_img; then " \
+			"load scsi $scsidev $image_addr $fpga_img && fpga loadb $fpga_idx $fileaddr $filesize; " \
+		"fi; " \
 		"load scsi $scsidev $image_addr $kernel_img && " \
 		"bootm $fileaddr\0"
 #include <configs/xilinx_zynqmp.h>
