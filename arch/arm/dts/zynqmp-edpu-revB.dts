@@ -17,7 +17,7 @@
 #include <dt-bindings/phy/phy.h>
 
 / {
-	model = "T6290E eDPU RevA";
+	model = "T6290E eDPU RevB";
 	compatible = "xlnx,zynqmp";
 
 	aliases {
@@ -191,11 +191,6 @@
 			#address-cells = <1>;
 			#size-cells = <0>;
 			reg = <0>;
-			ina226@40 { /* D36, +12V FMC */
-				compatible = "ti,ina226";
-				reg = <0x40>;
-				shunt-resistor = <5000>;
-			};
 			ina226@41 {  /* D31, +12V EPSU */
 				compatible = "ti,ina226";
 				reg = <0x41>;
