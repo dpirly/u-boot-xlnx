@@ -62,8 +62,8 @@
 			"bootm $fileaddr; " \
 		"fi; \0" \
 	"sataboot=scsi scan && " \
-		"run generate_file_names || " \
-		"run load_pl || ; " \
+		"run generate_file_names && " \
+		"run load_pl && ; " \
 		"run load_ps; \0" \
 		
 #include <configs/xilinx_zynqmp.h>
