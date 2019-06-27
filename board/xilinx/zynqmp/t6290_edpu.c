@@ -7,6 +7,13 @@
 
 #include "t6290_edpu.h"
 
+#include <rtk_switch.h>
+
+#include <miiphy.h>
+#include <phy.h>
+#include <port.h>
+#include <rtl8367c_asicdrv_port.h>
+
 uint8_t config_dsp1_arr[]=
 {
   0xaa, 0x55, 0xaa, 0xff, 0xff, 0xff, 0x07, 0x63, 
@@ -937,6 +944,126 @@ void edpu_init_eth_mac(void){
 	}
 }
 
+#ifndef rtk_int32
+typedef int                     rtk_int32;
+#endif
+
+#ifndef rtk_uint32
+typedef unsigned int            rtk_uint32;
+#endif
+
+struct mii_dev *curr_bus = NULL;
+struct phy_device *curr_phydev = NULL;
+
+#define MDC_MDIO_CTRL0_REG          31
+#define MDC_MDIO_START_REG          29
+#define MDC_MDIO_CTRL1_REG          21
+#define MDC_MDIO_ADDRESS_REG        23
+#define MDC_MDIO_DATA_WRITE_REG     24
+#define MDC_MDIO_DATA_READ_REG      25
+#define MDC_MDIO_PREAMBLE_LEN       32
+
+#define MDC_MDIO_START_OP          0xFFFF
+#define MDC_MDIO_ADDR_OP           0x000E
+#define MDC_MDIO_READ_OP           0x0001
+#define MDC_MDIO_WRITE_OP          0x0003
+
+rtk_int32 smi_read(rtk_uint32 mAddrs, rtk_uint32 *rData)
+{
+	curr_bus->write(curr_bus, 0, 0, MDC_MDIO_CTRL0_REG, MDC_MDIO_ADDR_OP);
+
+	curr_bus->write(curr_bus, 0, 0, MDC_MDIO_ADDRESS_REG, mAddrs);
+
+	curr_bus->write(curr_bus, 0, 0, MDC_MDIO_CTRL1_REG, MDC_MDIO_READ_OP);
+
+	*rData = curr_bus->read(curr_bus, 0, 0, MDC_MDIO_DATA_READ_REG);
+
+	return 0;
+}
+
+rtk_int32 smi_write(rtk_uint32 mAddrs, rtk_uint32 rData)
+{
+	curr_bus->write(curr_bus, 0, 0, MDC_MDIO_CTRL0_REG, MDC_MDIO_ADDR_OP);
+
+	curr_bus->write(curr_bus, 0, 0, MDC_MDIO_ADDRESS_REG, mAddrs);
+
+	curr_bus->write(curr_bus, 0, 0, MDC_MDIO_DATA_WRITE_REG, rData);
+
+	curr_bus->write(curr_bus, 0, 0, MDC_MDIO_CTRL1_REG, MDC_MDIO_WRITE_OP);
+	//return -1; //failed
+	return 0;
+}
+
+static int realtek_switch_init(const char* dev)
+{
+	rtk_mode_ext_t macMode;
+	rtk_api_ret_t rtl_ret;
+	rtk_port_mac_ability_t macPortability;
+	rtk_data_t txDelay, rxDelay;
+	
+	if (0 != miiphy_set_current_dev(dev))
+		return -1;
+
+	curr_bus = mdio_get_current_dev();
+
+	if (0 != rtk_switch_init())
+		return -1;
+
+	memset(&macPortability, 0, sizeof(rtk_port_mac_ability_t));
+	rtl_ret = rtk_port_macForceLinkExt_get(EXT_PORT0, &macMode, &macPortability);
+	if (rtl_ret != 0)
+		return -1;
+
+	macMode = MODE_EXT_RGMII;
+	macPortability.forcemode = MAC_FORCE;
+	macPortability.speed = SPD_1000M;
+	macPortability.link = PORT_LINKUP;
+	macPortability.duplex = FULL_DUPLEX;
+	macPortability.nway = DISABLED;
+	macPortability.txpause = ENABLED;
+	macPortability.rxpause = ENABLED;
+	rtl_ret = rtk_port_macForceLinkExt_set(EXT_PORT0, macMode, &macPortability);
+	if (rtl_ret != 0)
+		return -1;
+
+	rtl_ret = rtk_port_rgmiiDelayExt_get(EXT_PORT0, &txDelay, &rxDelay);
+	if (rtl_ret != 0)
+		return -1;
+
+	/*
+		The API is used to set RGMII interface TX and RX delay. In TX delay, the value 1 means delay 2ns and
+		0 means no delay. In RX delay, there are 8 steps to tune the delay status.
+		*/
+	txDelay = 1;
+	//txDelay = 0; // can not rx data
+	
+	//rxDelay = 7;
+	//rxDelay = 4; //default
+	rtl_ret = rtk_port_rgmiiDelayExt_set(EXT_PORT0, txDelay, rxDelay);
+	if (rtl_ret != 0)
+		return -1;
+
+	return 0;
+}
+
+void edpu_realtek_switch_init(void)
+{
+	printf("\nEthernet Switch1: ");
+	if(0 == realtek_switch_init("eth0")){
+		printf("OK\n");
+	}else{
+		printf("Failed!\n");
+	}
+
+	printf("Ethernet Switch2: ");
+	if(0 == realtek_switch_init("eth1")){
+		printf("OK\n");
+	}else{
+		printf("Failed!\n");
+	}
+	printf("\n");
+}
+
 void edpu_cpld_init(void)
 {
 	/* check DDR4 module */
@@ -954,6 +1081,7 @@ void edpu_cpld_init(void)
 	//edpu_dsp_config_clear(0);
 	edpu_dsp_config(0, 0);
 	edpu_dsp_config(1, 0);
+	printf("\n");
 	udelay(10*1000);
 
 	/* release dsp */

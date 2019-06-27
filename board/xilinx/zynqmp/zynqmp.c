@@ -568,6 +568,12 @@ int checkboard(void)
 	return 0;
 }
 
+int last_stage_init(void)
+{
+	edpu_realtek_switch_init();
+	return 0;
+}
+
 #if defined(CONFIG_AES)
 
 #define KEY_LEN				64
