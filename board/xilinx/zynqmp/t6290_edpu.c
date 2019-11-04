@@ -16,8 +16,8 @@
 
 uint8_t config_dsp1_arr[]=
 {
-  0xaa, 0x55, 0xaa, 0xff, 0xff, 0xff, 0x07, 0x63, 
-  0x10, 0x00, 0xff, 0xff, 0xff, 0x01, 0x86, 0x06, 
+  0xaa, 0x55, 0xaa, 0xff, 0xff, 0xff, 0x07, 0x43, 
+  0x00, 0x00, 0xff, 0xff, 0xff, 0x01, 0x86, 0x06, 
   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xff, 
   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
@@ -180,8 +180,8 @@ uint8_t config_dsp1_arr[]=
 
 uint8_t config_dsp2_arr[]=
 {
-  0xaa, 0x55, 0xaa, 0xff, 0xff, 0xff, 0x07, 0x63, 
-  0x10, 0x00, 0xff, 0xff, 0xff, 0x01, 0x86, 0x06, 
+  0xaa, 0x55, 0xaa, 0xff, 0xff, 0xff, 0x07, 0x43, 
+  0x00, 0x00, 0xff, 0xff, 0xff, 0x01, 0x86, 0x06, 
   0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xff, 
   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
@@ -388,7 +388,7 @@ static bool edpu_dsp_need_config(uint32_t dsp_id){
 
 	ret = eeprom_read(DSP_EEPROM_ADDR, 0, buf, sizeof(buf));
 	if(ret != 0){
-		printf("error in eeprom_read\n");
+		printf("error in eeprom_read, dsp_id=%d\n", dsp_id);
 		return 0;
 	}
 
@@ -515,7 +515,7 @@ static const char* edpu_ddr4_company(uint8_t bank, uint8_t code){
 		return "Gloway International";
 	}else if(bank == 9 && code == 0x13){
 		return "Gloway International";
-	}else if((bank == 0x80 || bank == 0x00) && code == 0xCE){
+	}else if((bank == 0x80 || bank == 0x00 || bank == 0x01) && code == 0xCE){
 		return "Samsung";
 	}else if(bank == 5 && code == 0xCD){
 		return "G.Skill Intl";
@@ -744,6 +744,36 @@ char* edpu_cpld_version(void){
 		edpu_cpld_read(T6290_EDPU_REG_VER_MMDD_c),
 		edpu_cpld_read(T6290_EDPU_REG_HW_VER_c));
 	return cpld_ver;
+}
+
+void edpu_cpld_get_hardware_resources(uint32_t* rf_channels, uint32_t* rf_ports, uint32_t* dsp_bitmap){
+	char buf[32];
+	uint32_t reg = edpu_cpld_read(T6290_EDPU_REG_HW_RESOURCES_c);
+
+	*rf_channels = (reg & 0x000f);
+	*rf_ports    = (reg & 0x00f0) >> 4;
+	*dsp_bitmap  = (reg & 0x0f00) >> 8;
+
+	*rf_ports = *rf_ports + 1; /* 0~15 to 1~16 */
+
+	printf("DSP bitmap:0x%x, RF channels:%d, RF ports:%d\n", 
+			*dsp_bitmap, *rf_channels, *rf_ports);
+
+	/* rf channel */
+	sprintf(buf, "%d", *rf_channels);
+	env_set("rfch", buf);
+
+	/* rf port */
+	sprintf(buf, "%d", *rf_ports);
+	env_set("rfport", buf);
+
+	/* dsp */
+	sprintf(buf, "%x", *dsp_bitmap);
+	env_set("dsp", buf);
+
+	/* dsp */
+	sprintf(buf, "rfc%drfp%d", *rf_channels, *rf_ports);
+	env_set("hwcfg", buf);
 }
 
 static void edpu_module_reset(uint32_t en, uint32_t bits){
@@ -1007,12 +1037,12 @@ static int realtek_switch_init(const char* dev)
 	curr_bus = mdio_get_current_dev();
 
 	if (0 != rtk_switch_init())
-		return -1;
+		return -2;
 
 	memset(&macPortability, 0, sizeof(rtk_port_mac_ability_t));
 	rtl_ret = rtk_port_macForceLinkExt_get(EXT_PORT0, &macMode, &macPortability);
 	if (rtl_ret != 0)
-		return -1;
+		return -3;
 
 	macMode = MODE_EXT_RGMII;
 	macPortability.forcemode = MAC_FORCE;
@@ -1024,11 +1054,11 @@ static int realtek_switch_init(const char* dev)
 	macPortability.rxpause = ENABLED;
 	rtl_ret = rtk_port_macForceLinkExt_set(EXT_PORT0, macMode, &macPortability);
 	if (rtl_ret != 0)
-		return -1;
+		return -4;
 
 	rtl_ret = rtk_port_rgmiiDelayExt_get(EXT_PORT0, &txDelay, &rxDelay);
 	if (rtl_ret != 0)
-		return -1;
+		return -5;
 
 	/*
 		The API is used to set RGMII interface TX and RX delay. In TX delay, the value 1 means delay 2ns and
@@ -1041,37 +1071,44 @@ static int realtek_switch_init(const char* dev)
 	//rxDelay = 4; //default
 	rtl_ret = rtk_port_rgmiiDelayExt_set(EXT_PORT0, txDelay, rxDelay);
 	if (rtl_ret != 0)
-		return -1;
+		return -6;
 
 	return 0;
 }
 
 void edpu_realtek_switch_init(void)
 {
+	int ret;
+	
 	printf("\nEthernet Switch1: ");
-	if(0 == realtek_switch_init("eth0")){
+	ret = realtek_switch_init("eth0");
+	if(0 == ret){
 		printf("OK\n");
 	}else{
-		printf("Failed!\n");
+		printf("Failed! ret=%d\n", ret);
 	}
 
 	printf("Ethernet Switch2: ");
-	if(0 == realtek_switch_init("eth1")){
+	ret = realtek_switch_init("eth1");
+	if(0 == ret){
 		printf("OK\n");
 	}else{
-		printf("Failed!\n");
+		printf("Failed! ret=%d\n", ret);
 	}
 	printf("\n");
 }
 
 void edpu_cpld_init(void)
 {
+	uint32_t rf_channels, rf_ports, dsp_bitmap;
+
 	/* check DDR4 module */
 	edpu_ddr4_init();
 
 	/* check CPLD */
 	printf("\neDPU CPLD:%s\n", edpu_cpld_version());
 	edpu_init_eth_mac(); /* read and set ps ethernet mac address from CPLD*/
+	edpu_cpld_get_hardware_resources(&rf_channels, &rf_ports, &dsp_bitmap);
 
 	/* check DSP's I2C EEPROM */
 	edpu_module_reset(1, MODULE_RESET_DSP_0 | MODULE_RESET_DSP_1); /* put all dsp into reset */
@@ -1079,8 +1116,14 @@ void edpu_cpld_init(void)
 
 	/* configure dsp i2c eeprom if need */
 	//edpu_dsp_config_clear(0);
-	edpu_dsp_config(0, 0);
-	edpu_dsp_config(1, 0);
+	if(dsp_bitmap & 0b01){
+		printf("checking DSP(a) EEPROM...\n");
+		edpu_dsp_config(0, 0);
+	}
+	if(dsp_bitmap & 0b10){
+		printf("checking DSP(b) EEPROM...\n");
+		edpu_dsp_config(1, 0);
+	}
 	printf("\n");
 	udelay(10*1000);
 

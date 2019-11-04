@@ -41,6 +41,12 @@
 #define T6290_EDPU_REG_UFM_RD_DATA6_c      (0x23)
 #define T6290_EDPU_REG_UFM_RD_DATA7_c      (0x24)
 #define T6290_EDPU_REG_UFM_RD_STATUS_c     (0x25)
+#define T6290_EDPU_REG_SCRTCH_c            (0x26)
+#define T6290_EDPU_REG_REF_CFG_c           (0x27)
+#define T6290_EDPU_REG_CPLD_IRQ_c          (0x28)
+#define T6290_EDPU_REG_HW_RESOURCES_c      (0x29)
+
+
 
 
 #define MODULE_RESET_DSP_0				(1<<0)

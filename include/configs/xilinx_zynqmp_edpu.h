@@ -37,10 +37,10 @@
 	"fpga_idx=0\0" \
 	"generate_file_names=" \
 		"if test -e $ddr_pl_size; then " \
-			"setenv pl_image_file plm\"$ddr_pl_size\"r\"$ddr_pl_rank\".bit; " \
+			"setenv pl_image_file plms\"$ddr_pl_size\"mr\"$ddr_pl_rank\"\"$hwcfg\".bit; " \
 		"fi; " \
 		"if test -e $ddr_ps_size; then " \
-			"setenv ps_image_file psm\"$ddr_ps_size\"r\"$ddr_ps_rank\".ub; " \
+			"setenv ps_image_file psms\"$ddr_ps_size\"mr\"$ddr_ps_rank\"\"$hwcfg\".ub; " \
 		"fi; \0" \
 	"load_pl=" \
 		"env delete fileaddr; " \
