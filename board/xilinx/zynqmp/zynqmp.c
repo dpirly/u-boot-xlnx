@@ -570,7 +570,6 @@ int checkboard(void)
 
 int last_stage_init(void)
 {
-	edpu_realtek_switch_init();
 	return 0;
 }
 

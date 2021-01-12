@@ -32,4 +32,3 @@ obj-$(CONFIG_PHY_VITESSE) += vitesse.o
 obj-$(CONFIG_PHY_MSCC) += mscc.o
 obj-$(CONFIG_PHY_FIXED) += fixed.o
 
-obj-y += realtek_sw/

@@ -74,6 +74,4 @@ int edpu_cpld_flash_read(uint32_t page_addr, uint32_t traceid, uint16_t* p);
 char* edpu_cpld_version(void);
 void edpu_cpld_init(void);
 
-void edpu_realtek_switch_init(void);
-
 #endif
