@@ -1,34 +1,25 @@
 /*
- * Configuration for Welzek n
+ * Configuration for Welzek m9000
  *
  * SPDX-License-Identifier:	GPL-2.0+
  */
 
-#ifndef __CONFIG_ZYNQMP_EDPU_H
-#define __CONFIG_ZYNQMP_EDPU_H
+#ifndef __CONFIG_ZYNQMP_M9000_H
+#define __CONFIG_ZYNQMP_M9000_H
 
 #define CONFIG_LAST_STAGE_INIT 1
 
 
-#define CONFIG_SYS_I2C_MAX_HOPS		1
-#define CONFIG_SYS_NUM_I2C_BUSES	9
-#define CONFIG_SYS_I2C_BUSES	{ \
-				{0, {I2C_NULL_HOP} }, \
-				{0, {{I2C_MUX_PCA9548, 0x70, 0} } }, \
-				{0, {{I2C_MUX_PCA9548, 0x70, 1} } }, \
-				{0, {{I2C_MUX_PCA9548, 0x70, 2} } }, \
-				{0, {{I2C_MUX_PCA9548, 0x70, 3} } }, \
-				{0, {{I2C_MUX_PCA9548, 0x70, 4} } }, \
-				{0, {{I2C_MUX_PCA9548, 0x70, 5} } }, \
-				{0, {{I2C_MUX_PCA9548, 0x70, 6} } }, \
-				{0, {{I2C_MUX_PCA9548, 0x70, 7} } }, \
-				}
+#define CONFIG_SYS_I2C_MAX_HOPS		0
+#define CONFIG_SYS_NUM_I2C_BUSES	0
+#define CONFIG_SYS_I2C_BUSES		{}
 
 #define CONFIG_SYS_I2C_ZYNQ
 
-#define CONFIG_SYS_I2C_EEPROM_ADDR        0x50    /* EEPROM at24c08        */
-#define CONFIG_SYS_I2C_EEPROM_ADDR_LEN     2      /* Bytes of address        */
-#define CONFIG_SYS_EEPROM_PAGE_WRITE_DELAY_MS    10  /* delay of each i2c eeprom write */
+
+#define CONFIG_SYS_I2C_EEPROM_ADDR		0x50	/* EEPROM at24c08        */
+#define CONFIG_SYS_I2C_EEPROM_ADDR_LEN		2	/* Bytes of address        */
+#define CONFIG_SYS_EEPROM_PAGE_WRITE_DELAY_MS	10	/* delay of each i2c eeprom write */
 
 
 #define CONFIG_EXTRA_ENV_SETTINGS \

@@ -17,7 +17,7 @@
 #include <dt-bindings/phy/phy.h>
 
 / {
-	model = "T6290E eDPU RevB";
+	model = "T6290E m9000";
 	compatible = "xlnx,zynqmp";
 
 	aliases {
@@ -118,42 +118,18 @@
 	phy-mode = "rgmii-id";
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_gem0_default>;
-	/*
+
 	phy0: phy@21 {
 		reg = <21>;
 		ti,rx-internal-delay = <0x8>;
 		ti,tx-internal-delay = <0xa>;
 		ti,fifo-depth = <0x1>;
 		ti,rxctrl-strap-worka;
-	};*/
-	fixed-link {
-		speed = <1000>;
-		full-duplex;
-		pause;
-		asym-pause;
 	};
 };
 
 &gem1 {
-	status = "okay";
-	/*phy-handle = <&phy1>; */
-	phy-mode = "rgmii-id";
-	pinctrl-names = "default";
-	pinctrl-0 = <&pinctrl_gem1_default>;
-	/*
-	phy1: phy@21 {
-		reg = <21>;
-		ti,rx-internal-delay = <0x8>;
-		ti,tx-internal-delay = <0xa>;
-		ti,fifo-depth = <0x1>;
-		ti,rxctrl-strap-worka;
-	};*/
-	fixed-link {
-		speed = <1000>;
-		full-duplex;
-		pause;
-		asym-pause;
-	};
+	status = "disabled";
 };
 
 &gpio {
@@ -182,107 +158,6 @@
 	scl-gpios = <&gpio 16 GPIO_ACTIVE_HIGH>;
 	sda-gpios = <&gpio 17 GPIO_ACTIVE_HIGH>;
 
-	i2c-mux@70 { /* A2A1A0=000 */
-		compatible = "nxp,pca9548";
-		#address-cells = <1>;
-		#size-cells = <0>;
-		reg = <0x70>;
-		i2c@0 {
-			#address-cells = <1>;
-			#size-cells = <0>;
-			reg = <0>;
-			ina226@41 {  /* D31, +12V EPSU */
-				compatible = "ti,ina226";
-				reg = <0x41>;
-				shunt-resistor = <5000>;
-			};
-		};
-		i2c@1 {
-			#address-cells = <1>;
-			#size-cells = <0>;
-			reg = <1>;
-			eeprom0: eeprom@50 { /* D7, DSP1-EEPROM */
-				compatible = "atmel,24c512";
-				reg = <0x50>;
-			};
-		};
-		i2c@2 {
-			#address-cells = <1>;
-			#size-cells = <0>;
-			reg = <2>;
-			eeprom1: eeprom@51 { /* D6, DSP2-EEPROM */
-				compatible = "atmel,24c512";
-				reg = <0x51>;
-			};
-		};
-		i2c@3 {
-			#address-cells = <1>;
-			#size-cells = <0>;
-			reg = <3>;
-			adt75: adt75@47 { /* N1 */
-				compatible = "adt75";
-				reg = <0x47>;
-			};
-		};
-		i2c@4 {
-			#address-cells = <1>;
-			#size-cells = <0>;
-			reg = <4>;
-			/* PS DDR4 SODIMM */
-			dev@19 {
-				reg = <0x19>;
-			};
-			dev@30 {
-				reg = <0x30>;
-			};
-			dev@35 {
-				reg = <0x35>;
-			};
-			dev@36 {
-				reg = <0x36>;
-			};
-			dev@51 {
-				reg = <0x51>;
-			};
-		};
-		i2c@5 {
-			#address-cells = <1>;
-			#size-cells = <0>;
-			reg = <5>;
-			/* PL DDR4 SODIMM */
-			dev@19 {
-				reg = <0x19>;
-			};
-			dev@30 {
-				reg = <0x30>;
-			};
-			dev@35 {
-				reg = <0x35>;
-			};
-			dev@36 {
-				reg = <0x36>;
-			};
-			dev@51 {
-				reg = <0x51>;
-			};
-		};
-		i2c@6 {
-			#address-cells = <1>;
-			#size-cells = <0>;
-			reg = <6>;
-			hd3ss3220@67 {
-				compatible = "ti,hd3ss3220";
-				reg = <0x67>;
-			};
-		};
-		i2c@7 {
-			#address-cells = <1>;
-			#size-cells = <0>;
-			reg = <7>;
-			/* QSFP */
-		};
-
-	};
 };
 
 &pinctrl0 {
@@ -578,13 +453,13 @@
 };
 
 &usb1 {
-	status = "okay";
+	status = "disabled";
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_usb1_default>;
 };
 
 &dwc3_1 {
-	status = "okay";
+	status = "disabled";
 	dr_mode = "host";
 	snps,usb3_lpm_capable;
 	phy-names = "usb3-phy";
